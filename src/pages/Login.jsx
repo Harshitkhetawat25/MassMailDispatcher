@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_URL } from "../../constants/config";
 import { useNavigate } from "react-router-dom";
@@ -6,9 +6,10 @@ import { toast } from "react-toastify";
 import { SlLogin } from "react-icons/sl";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 // Import your user action - adjust path as needed
 import { setUserData } from "../redux/userSlice";
+import useGetCurrentUser from "../hooks/useGetCurrentUser";
 
 const LoginContent = () => {
   const navigate = useNavigate();
@@ -16,6 +17,16 @@ const LoginContent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Get current user state
+  const { user, loading } = useGetCurrentUser();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user && user.isVerified) {
+      navigate("/", { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

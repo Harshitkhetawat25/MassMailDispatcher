@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_URL } from "../../constants/config";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
+import useGetCurrentUser from "../hooks/useGetCurrentUser";
 
 const SignupContent = () => {
   const navigate = useNavigate();
@@ -16,6 +17,16 @@ const SignupContent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSigningUp, setIsSigningUp] = useState(false);
+
+  // Get current user state
+  const { user, loading } = useGetCurrentUser();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user && user.isVerified) {
+      navigate("/", { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
