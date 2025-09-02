@@ -95,12 +95,7 @@ const login = async (req, res) => {
         message: "User does not exist",
       });
     }
-    if (user.googleTokens && Object.keys(user.googleTokens).length > 0) {
-      return res.status(400).json({
-        message:
-          "This account was created with Google. Please use 'Continue with Google' to log in.",
-      });
-    }
+
     if (!validator.validate(email)) {
       return res.status(400).json({
         message: "Invalid email",
@@ -112,6 +107,19 @@ const login = async (req, res) => {
         message: "Password must be at least 8 characters long",
       });
     }
+
+    // Check if user was created with Google ONLY if they don't have a regular password
+    if (
+      user.googleTokens &&
+      Object.keys(user.googleTokens).length > 0 &&
+      !user.password
+    ) {
+      return res.status(400).json({
+        message:
+          "This account was created with Google. Please use 'Continue with Google' to log in.",
+      });
+    }
+
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({
@@ -190,6 +198,7 @@ const googleAuthController = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
+      // Create new user with Google account
       const randomPassword = crypto.randomBytes(32).toString("hex");
       user = await User.create({
         name,
@@ -203,7 +212,16 @@ const googleAuthController = async (req, res) => {
         },
       });
     } else {
-      // Update existing user's Google tokens
+      // Check if this is an existing normal account
+      if (!user.googleTokens || Object.keys(user.googleTokens).length === 0) {
+        // This is a normal email/password account
+        return res.status(400).json({
+          message:
+            "This email is already registered with email/password. Please sign in using your password instead.",
+        });
+      }
+
+      // Update existing Google user's tokens
       user.googleTokens = {
         accessToken,
         scope,

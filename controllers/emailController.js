@@ -30,11 +30,13 @@ const sendMassEmails = async (req, res) => {
         message: "User not found",
       });
     }
+
     // Check if user has Gmail permissions
     if (!user.googleTokens || !user.googleTokens.accessToken) {
       return res.status(400).json({
         success: false,
-        message: "Gmail permissions required. Please login with Google.",
+        message:
+          "Gmail permissions required. Please login with Google to send emails from your account.",
       });
     }
 
@@ -42,7 +44,7 @@ const sendMassEmails = async (req, res) => {
     if (user.googleTokens.expiryDate < new Date()) {
       return res.status(400).json({
         success: false,
-        message: "Gmail token expired. Please login again.",
+        message: "Gmail token expired. Please login with Google again.",
       });
     }
 
@@ -73,6 +75,7 @@ const sendMassEmails = async (req, res) => {
     let successCount = 0;
     let failedCount = 0;
     let failedEmails = [];
+
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
       const emailPromises = batch.map(async (row) => {
@@ -87,6 +90,8 @@ const sendMassEmails = async (req, res) => {
         try {
           let personalizedSubject = subject;
           let personalizedBody = body;
+
+          // Replace placeholders with actual data
           headers.forEach((header) => {
             const placeholder = `{{${header}}}`;
             const value = row[header] || "";
@@ -99,6 +104,7 @@ const sendMassEmails = async (req, res) => {
               value
             );
           });
+
           const emailField = headers.find((header) =>
             header.toLowerCase().includes("email")
           );
@@ -175,7 +181,12 @@ async function sendVerificationEmail(user, verificationUrl) {
       pass: process.env.EMAIL_PASS,
     },
   });
-  console.log("EMAIL_USER:", process.env.EMAIL_USER, "EMAIL_PASS:", process.env.EMAIL_PASS);
+  console.log(
+    "EMAIL_USER:",
+    process.env.EMAIL_USER,
+    "EMAIL_PASS:",
+    process.env.EMAIL_PASS
+  );
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: user.email,
@@ -188,5 +199,6 @@ async function sendVerificationEmail(user, verificationUrl) {
 }
 
 module.exports = {
-  sendMassEmails, sendVerificationEmail
+  sendMassEmails,
+  sendVerificationEmail,
 };
