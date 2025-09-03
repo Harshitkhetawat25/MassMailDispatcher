@@ -23,6 +23,13 @@ app.use(
       "https://r8752nt4-5173.inc1.devtunnels.ms",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cookie",
+      "X-Requested-With",
+    ],
   })
 );
 
@@ -32,6 +39,14 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/template", templateRouter);
 app.use("/api/email", emailRouter);
 app.use("/api/mail", mailLogRouter);
+
+// Debug route to test connectivity
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "Backend is working!",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
