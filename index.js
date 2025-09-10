@@ -11,6 +11,7 @@ const uploadRouter = require("./routes/uploadRoute");
 const templateRouter = require("./routes/templateRoute");
 const emailRouter = require("./routes/emailRoute");
 const mailLogRouter = require("./routes/mailLogRoute");
+const aiRoute = require("./routes/aiRoute");
 
 app.use(cookieParser());
 app.use(express.json());
@@ -39,6 +40,7 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/template", templateRouter);
 app.use("/api/email", emailRouter);
 app.use("/api/mail", mailLogRouter);
+app.use("/api/ai", aiRoute);
 
 // Debug route to test connectivity
 app.get("/api/test", (req, res) => {
