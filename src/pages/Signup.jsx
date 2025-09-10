@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../lib/axios";
 import { API_URL } from "../../constants/config";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -33,15 +33,11 @@ const SignupContent = () => {
     setIsSigningUp(true);
 
     try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/signup`,
-        {
-          name,
-          email,
-          password,
-        },
-        { withCredentials: true }
-      );
+      const response = await api.post("/api/auth/signup", {
+        name,
+        email,
+        password,
+      });
 
       if (response.data.user) {
         toast.success(
@@ -59,14 +55,10 @@ const SignupContent = () => {
 
   const handleOnSuccess = async (tokenResponse) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/google`,
-        {
-          accessToken: tokenResponse.access_token,
-          scope: tokenResponse.scope,
-        },
-        { withCredentials: true }
-      );
+      const response = await api.post("/api/auth/google", {
+        accessToken: tokenResponse.access_token,
+        scope: tokenResponse.scope,
+      });
 
       if (response.data.user) {
         dispatch(setUserData(response.data.user));
